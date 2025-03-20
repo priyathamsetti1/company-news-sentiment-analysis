@@ -1,142 +1,146 @@
-# News Sentiment Analysis and Topic Extraction
+# News Summarization and Text-to-Speech Application
 
-## Project Overview
-This project is designed to fetch the latest news articles related to a specified company from Google News RSS feeds. It processes the articles to extract key details, perform sentiment analysis, identify important topics, and generate concise summaries. 
+## Objective
+Develop a web-based application that extracts key details from multiple news articles related to a given company, performs sentiment analysis, conducts a comparative analysis, and generates a text-to-speech (TTS) output in Hindi. The tool allows users to input a company name and receive a structured sentiment report along with an audio output.
 
-### Key Functionalities:
-- **News Extraction:** Fetches the top 10 news articles from Google News RSS for a given company.
-- **Sentiment Analysis:** Uses VADER Sentiment Analyzer to classify news articles as Positive, Negative, or Neutral.
-- **Topic Extraction:** Implements KeyBERT to extract key topics from article summaries.
-- **Text Summarization:** Utilizes the BART Transformer model for text summarization.
-- **Language Filtering:** Ensures that only English-language articles are processed.
+## Features
 
-## Dependencies
-Before running the project, ensure the following dependencies are installed:
+1. **News Extraction**: Extract and display the title, summary, and relevant metadata from at least 10 unique news articles.
+2. **Sentiment Analysis**: Analyze article content for sentiment (Positive, Negative, Neutral).
+3. **Comparative Analysis**: Compare sentiment across articles for insights on news coverage variations.
+4. **Text-to-Speech**: Convert summarized content into Hindi speech using an open-source TTS model.
+5. **User Interface**: Streamlit or Gradio-based UI for easy interaction.
+6. **API Development**: Frontend and backend communication via APIs.
+7. **Deployment**: Hosted on Hugging Face Spaces.
+8. **Documentation**: Detailed README explaining implementation, dependencies, and setup.
 
-### Required Libraries:
-You can install all dependencies using the following command:
-```sh
-pip install feedparser langdetect vaderSentiment keybert transformers torch requests
-```
+## Tech Stack
 
-| Dependency       | Purpose |
-|-----------------|-------------------------------------------------|
-| `feedparser`    | Fetches and parses RSS feeds for news articles |
-| `langdetect`    | Detects the language of the news article summary |
-| `vaderSentiment` | Performs sentiment analysis using VADER |
-| `keybert`       | Extracts key topics from text using NLP |
-| `transformers`  | Provides pre-trained NLP models for summarization |
-| `torch`         | Required for running transformer-based models |
-| `requests`      | Handles HTTP requests for API integration (if needed) |
+### **Backend Framework**
+- FastAPI
+- Uvicorn (ASGI server)
 
-## Setup Instructions
+### **Programming Language**
+- Python
 
-### 1. Install Python
-Ensure you have **Python 3.8 or later** installed. You can check your Python version by running:
-```sh
-python --version
-```
+### **Machine Learning & NLP Libraries**
+- Transformers (Hugging Face)
+- VaderSentiment
+- KeyBERT
+- LangDetect
+- Summarization Pipeline (Facebook BART)
 
-### 2. Install Dependencies
-Run the following command to install all required libraries:
-```sh
-pip install feedparser langdetect vaderSentiment keybert transformers torch requests
-```
+### **Web Scraping & News Fetching**
+- Feedparser
 
-### 3. Run the Script
-Create a new Python script (e.g., `news_analysis.py`) and copy the following code into it:
+### **Frontend Framework**
+- Streamlit
 
-```python
-import feedparser
-from langdetect import detect, LangDetectException
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from keybert import KeyBERT
-from transformers import pipeline
+### **Data Visualization**
+- Plotly Express
+- Matplotlib
+- Pandas
 
-# Initialize components
-analyzer = SentimentIntensityAnalyzer()
-kw_model = KeyBERT()
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+### **Audio Generation**
+- gTTS (Google Text-to-Speech)
+- Google Translator
 
-def analyze_sentiment(text: str) -> str:
-    """Determines the sentiment of a given text using VADER."""
-    score = analyzer.polarity_scores(text)
-    return "Positive" if score["compound"] >= 0.05 else "Negative" if score["compound"] <= -0.05 else "Neutral"
+### **Additional Libraries**
+- Requests (HTTP requests)
+- Base64 (encoding/decoding)
+- Threading
+- Re (Regular Expressions)
 
-def extract_topics(text: str) -> list:
-    """Extracts key topics from a given text using KeyBERT."""
-    return kw_model.extract_keywords(text, keyphrase_ngram_range=(1, 2), stop_words="english", top_n=5)
+### **Deployment & Hosting**
+- Local development with threading
+- Hosted on Hugging Face Spaces: [Click Here](https://priyatahm-sentiment-news-analysis.hf.space)
 
-def summarize_text(text: str) -> str:
-    """Summarizes the input text using a pre-trained BART model."""
-    if len(text.split()) > 50:
-        return summarizer(text, max_length=50, min_length=25, do_sample=False)[0]["summary_text"]
-    return text
+### **Caching**
+- In-memory dictionary-based caching
 
-def fetch_news(company: str):
-    """Fetches and processes news articles for a given company."""
-    feed = feedparser.parse(f"https://news.google.com/rss/search?q={company}")
-    news = []
-    
-    for entry in feed.entries[:10]:
-        try:
-            if detect(entry.summary) == "en":
-                sentiment = analyze_sentiment(entry.summary)
-                topics = [kw[0] for kw in extract_topics(entry.summary)]
-                summary = summarize_text(entry.summary)
+### **Middleware**
+- CORS middleware (FastAPI)
 
-                news.append({
-                    "title": entry.title,
-                    "summary": summary,
-                    "sentiment": sentiment,
-                    "topics": topics,
-                    "link": entry.link
-                })
-        except LangDetectException:
-            continue
+## Installation & Setup
 
-    return news
+### Prerequisites
+- Python 3.8+
+- Required libraries (installed via `requirements.txt`)
 
-# Example Execution
-if __name__ == "__main__":
-    company_name = "Tesla"
-    news_data = fetch_news(company_name)
-    for article in news_data:
-        print(article)
-```
+### Steps to Run Locally
 
-### 4. Running the Script
-Save the script and run it using:
-```sh
-python news_analysis.py
-```
+1. **Clone the Repository**
+   ```bash
+   git clone <GitHub-repo-link>
+   cd News-Summarization-TTS
+   ```
+2. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Run the Application**
+   ```bash
+   streamlit run app.py
+   ```
+
+## API Development
+- **API Endpoints**
+  - `/fetch_news`: Fetches and extracts news articles.
+  - `/analyze_sentiment`: Performs sentiment analysis.
+  - `/compare_sentiment`: Conducts comparative analysis.
+  - `/generate_tts`: Converts summarized text to Hindi speech.
+
+- **Usage**
+  - APIs can be accessed via Postman or any REST client.
+  - Example:
+    ```bash
+    curl -X POST "/8000" -d '{"company": "Tesla"}' -H "Content-Type: application/json"
+    ```
+
+## Model Details
+- **Summarization**: Hugging Face Transformers (BART/T5)
+- **Sentiment Analysis**: Pretrained NLP model (e.g., VADER, DistilBERT)
+- **TTS**: Open-source Hindi TTS model (e.g., Coqui-TTS)
 
 ## Expected Output
-For each news article, the script will return structured JSON data like:
-```json
+```
 {
-  "title": "Tesla’s New Innovation in EVs",
-  "summary": "Tesla has unveiled a new battery technology...",
-  "sentiment": "Positive",
-  "topics": ["Tesla", "battery technology", "EV market"],
-  "link": "https://example.com/tesla-news"
+  "Company": "Tesla",
+  "Articles": [
+    {
+      "Title": "Tesla's New Model Breaks Sales Records",
+      "Summary": "Tesla's latest EV sees record sales in Q3...",
+      "Sentiment": "Positive",
+      "Topics": ["Electric Vehicles", "Stock Market", "Innovation"]
+    },
+    {
+      "Title": "Regulatory Scrutiny on Tesla's Self-Driving Tech",
+      "Summary": "Regulators have raised concerns over Tesla’s self-driving software...",
+      "Sentiment": "Negative",
+      "Topics": ["Regulations", "Autonomous Vehicles"]
+    }
+  ],
+  "Comparative Sentiment Score": { ... },
+  "Final Sentiment Analysis": "Tesla’s latest news coverage is mostly positive. Potential stock growth expected.",
+  "Audio": "[Play Hindi Speech]"
 }
 ```
 
-## Deployment Options
-This project can be deployed as:
-- **Web API using FastAPI**: Create an endpoint that returns processed news data.
-- **Streamlit Dashboard**: Display news articles, sentiment, and topics in an interactive UI.
-- **Hugging Face Spaces Deployment**: Host the model for easy access.
+## Assumptions & Limitations
+- Only non-JS news websites are scraped (BeautifulSoup used).
+- TTS output is limited to Hindi language.
+- Sentiment analysis accuracy depends on the dataset used.
 
-## Future Enhancements
-- Integrate real-time news updates using APIs.
-- Improve topic extraction using advanced NLP models.
-- Extend support for multilingual news sentiment analysis.
-
-## Contribution
-Feel free to contribute by adding new features or optimizing existing ones. Fork the repository and submit pull requests!
+## Contribution Guidelines
+- Fork the repository and create a feature branch.
+- Follow PEP8 guidelines.
+- Ensure proper documentation and comments in code.
+- Submit a pull request with a detailed explanation.
 
 ## License
-This project is open-source and available under the MIT License.
+This project is licensed under the MIT License.
 
+## Acknowledgements
+- Hugging Face for NLP models.
+- Streamlit/Gradio for UI framework.
+- Open-source TTS models for Hindi speech synthesis.
