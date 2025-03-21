@@ -94,7 +94,7 @@ Develop a web-based application that extracts key details from multiple news art
   - APIs can be accessed via Postman or any REST client.
   - Example:
     ```bash
-    curl -X POST "/8000" -d '{"company": "Tesla"}' -H "Content-Type: application/json"
+    curl -X GET "https://priyatahm-news-api.hf.space/news?company=comapnyname" -d '{"companyname": "Tesla"}' -H "Content-Type: application/json"
     ```
 
 ## Model Details
