@@ -84,7 +84,8 @@ recommendations.
 ### Steps to Run Locally
 
 1. **Clone the Repository**
-   ```git clone https://github.com/priyathamsetti1/company-news-sentiment-analysis.git
+   ```
+   git clone https://github.com/priyathamsetti1/company-news-sentiment-analysis.git
    ```
 2. **Install Dependencies**
    ```bash
