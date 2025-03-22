@@ -395,33 +395,320 @@ if analyze_button and company_name:
 elif analyze_button:
     st.warning("Please enter a company name.")
 ```
-
+```
 
 **backend.py (Core Processing)**
 
 - Orchestrates API calls to perform various tasks.
 - Ensures smooth communication between components.
+```
+@app.get("/news")
+async def get_news(company: str = Query(..., description="Enter company name")):
+    """
+    Fetch and analyze news for a given company.
 
+    Args:
+        company (str): Name of the company to search for.
+
+    Returns:
+        dict: Comprehensive news analysis and sentiment report.
+    """
+    cache_key = company.lower().strip()
+    current_time = time.time()
+
+    # Return cached result if available and not expired
+    if (cache_key in NEWS_CACHE and
+            (current_time - NEWS_CACHE[cache_key]["timestamp"]) < CACHE_EXPIRY):
+        return NEWS_CACHE[cache_key]["data"]
+
+    # Fetch fresh data asynchronously
+    articles = await asyncio.to_thread(fetch_news, company)
+
+    if not articles:
+        result = _create_empty_result(company)
+        NEWS_CACHE[cache_key] = {
+            "data": result,
+            "timestamp": current_time
+        }
+        return result
+
+    # Sentiment and Topic Analysis
+    sentiment_counts, structured_articles, analysis_result = _process_articles(
+        articles, company
+    )
+
+    # Generate audio as base64 string asynchronously
+    audio_base64 = await generate_audio(analysis_result["Final Sentiment Analysis"])
+
+    result = {
+        "Company": company,
+        "Articles": structured_articles,
+        "Comparative Sentiment Score": {
+            "Sentiment Distribution": sentiment_counts,
+            "Coverage Differences": analysis_result.get("Coverage Differences", []),
+            "Topic Overlap": analysis_result.get("Topic Overlap", {})
+        },
+        "Final Sentiment Analysis": analysis_result["Final Sentiment Analysis"],
+        "Audio": "",
+        "AudioBase64": audio_base64
+    }
+
+    # Cache the result
+    NEWS_CACHE[cache_key] = {
+        "data": result,
+        "timestamp": current_time
+    }
+
+    return result
+
+
+def _create_empty_result(company: str) -> dict:
+    """
+    Create an empty result when no articles are found.
+
+    Args:
+        company (str): Company name.
+
+    Returns:
+        dict: Empty result dictionary.
+    """
+    return {
+        "Company": company,
+        "Articles": [],
+        "Comparative Sentiment Score": {
+            "Sentiment Distribution": {"Positive": 0, "Negative": 0, "Neutral": 0},
+            "Topic Overlap": {"Common Topics": [], "Unique Topics": {}}
+        },
+        "Final Sentiment Analysis": f"No significant news coverage found for {company}.",
+        "Audio": "",
+        "AudioBase64": ""
+    }
+
+
+def _process_articles(articles: list, company: str) -> tuple:
+    """
+    Process articles for sentiment and topic analysis.
+
+    Args:
+        articles (list): List of news articles.
+        company (str): Company name.
+
+    Returns:
+        tuple: Sentiment counts, structured articles, and analysis results.
+    """
+    sentiment_counts = {"Positive": 0, "Negative": 0, "Neutral": 0}
+    structured_articles = []
+    all_topics = []
+    topic_sets = []
+    unique_topics = {}
+
+    for article in articles:
+        sentiment = analyze_sentiment(article["summary"])
+        article["sentiment"] = sentiment
+        sentiment_counts[sentiment] += 1
+        all_topics.extend(article["topics"])
+        topic_sets.append(set(article["topics"]))
+
+    # Topic frequency and analysis
+    topic_freq = Counter(all_topics)
+    common_topics = {
+        topic for topic, freq in topic_freq.items() if freq > 1
+    } or set(topic_freq.keys())
+
+    for i, article in enumerate(articles):
+        unique_topics[f"Unique Topics in Article {i+1}"] = list(
+            set(article["topics"]) - common_topics
+        )
+
+    # Coverage differences
+    coverage_differences = _generate_coverage_differences(articles)
+
+    # Structured articles
+    for article in articles:
+        structured_articles.append({
+            "Title": article["title"],
+            "Summary": article["summary"],
+            "Sentiment": article["sentiment"],
+            "Topics": article["topics"],
+        })
+
+    # Sentiment and stock prediction
+    dominant_sentiment = max(sentiment_counts, key=sentiment_counts.get)
+    stock_prediction = _get_stock_prediction(dominant_sentiment)
+    sentiment_summary = (
+        f"Final Sentiment Analysis: {company}'s latest news coverage is "
+        f"mostly {dominant_sentiment}. {stock_prediction}"
+    )
+
+    return sentiment_counts, structured_articles, {
+        "Final Sentiment Analysis": sentiment_summary,
+        "Coverage Differences": coverage_differences,
+        "Topic Overlap": {
+            "Common Topics": list(common_topics),
+            **unique_topics
+        }
+    }
+```
 
 **news_fetcher.py (News Extraction)**
-
+```
 - Uses Feedparser and web scraping techniques like BeautifulSoup
     to extract news articles.
 - Retrieves metadata such as title, summary, and source.
+```
+def fetch_news(company: str) -> list:
+    """
+    Fetch and analyze news articles for a given company.
 
+    Args:
+        company (str): The name of the company to fetch news for.
+
+    Returns:
+        list: A list of dictionaries containing news article details.
+    """
+    feed = feedparser.parse(f"https://news.google.com/rss/search?q={company}")
+    news = []
+
+    for entry in feed.entries[:10]:
+        try:
+            if detect(entry.summary) == "en":
+                summary = summarize_text(entry.summary)
+                topics = extract_topics(summary)
+                additional_topics = extract_additional_topics(entry.link)
+                sentiment = analyze_sentiment(summary)
+
+                news.append({
+                    "title": entry.title,
+                    "summary": summary,
+                    "sentiment": sentiment,
+                    "topics": topics + additional_topics,  # Combine topics
+                    "link": entry.link
+                })
+        except LangDetectException:
+            continue  # Skip if language detection fails
+
+    return news
+
+
+def extract_additional_topics(url: str) -> list:
+    """
+    Extract additional topics from the news article using Beautiful Soup.
+
+    Args:
+        url (str): The URL of the news article.
+
+    Returns:
+        list: A list of additional topics extracted from the article.
+    """
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Example: Extracting keywords from meta tags
+        keywords = soup.find("meta", attrs={"name": "keywords"})
+        if keywords:
+            return [keyword.strip() for keyword in keywords["content"].split(",")]
+
+        # You can add more extraction logic here as needed
+    except Exception as e:
+        print(f"Error fetching additional topics: {e}")
+
+    return []
+```
 
 **sentiment_analysis.py (Sentiment Computation)**
 
 - Uses NLP models (VADER, DistilBERT) for sentiment classification.
 - Outputs sentiment scores and classification (Positive, Negative,
     Neutral).
+def analyze_sentiment(text: str) -> str:
+    """
+    Analyze sentiment of given text.
+
+    Args:
+        text (str): Input text to analyze.
+
+    Returns:
+        str: Sentiment classification (Positive/Negative/Neutral).
+    """
+    score = ANALYZER.polarity_scores(text)
+    if score["compound"] >= 0.05:
+        return "Positive"
+    elif score["compound"] <= -0.05:
+        return "Negative"
+    return "Neutral"
 
 
+def extract_topics(text: str) -> list:
+    """
+    Extract top keywords from text.
+
+    Args:
+        text (str): Input text to extract keywords from.
+
+    Returns:
+        list: Top 5 keywords/keyphrases.
+    """
+    return [kw[0] for kw in KW_MODEL.extract_keywords(
+        text,
+        keyphrase_ngram_range=(1, 2),
+        stop_words="english",
+        top_n=5
+    )]
+
+
+def summarize_text(text: str) -> str:
+    """
+    Summarize text if longer than 50 words.
+
+    Args:
+        text (str): Input text to summarize.
+
+    Returns:
+        str: Summarized text or original text if too short.
+    """
+    if len(text.split()) > 50:
+        return SUMMARIZER(
+            text,
+            max_length=50,
+            min_length=25,
+            do_sample=False
+        )[0]["summary_text"]
+    return text
+```
 **requirements.tx**
 
 - Lists all required dependencies for the project.
 - Ensures consistency across installations.
-
+```
+fastapi
+uvicorn
+beautifulsoup4
+requests
+nltk
+transformers
+torch
+numpy
+pandas
+scikit-learn
+gtts
+gradio
+streamlit
+textblob
+deep-translator
+feedparser
+langdetect
+wordcloud
+seaborn 
+matplotlib 
+vaderSentiment
+plotly
+keybert
+langdetect 
+torchvision
+torchaudio
+beautifulsoup4
+```
 
 
 
