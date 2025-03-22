@@ -31,7 +31,7 @@ This application allows users to input a company name, fetches related news arti
 1. **Clone the Repository:**  
    ```bash
    git clone https://github.com/priyathamsetti1/company-news-sentiment-analysis
-   cd your-repo-name
+   cd company-news-sentiment-analysis
    ```
 
 2. **Install Dependencies:**  
