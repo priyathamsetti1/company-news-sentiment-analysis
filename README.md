@@ -1,7 +1,20 @@
 # News Summarization and Text-to-Speech Application with stock recommendation system
 
 ## Objective
-Develop a web-based application that extracts key details from multiple news articles related to a given company, performs sentiment analysis, conducts a comparative analysis, and generates a text-to-speech (TTS) output in Hindi. The tool allows users to input a company name and receive a structured sentiment report along with an audio output.
+In today's fast-paced digital world, businesses and individuals need to stay
+informed about company news which helps to determine future trends in
+the stocks of the comapany. However, analyzing multiple news articles
+manually is time-consuming. This project automates the process by
+summarizing news articles, analyzing their sentiment, and providing text-
+to-speech (TTS) conversion in Hindi and also predict the stock prices of the
+company based on the overall sentimental summary and provide stock
+recommendations.
+Overview
+This application allows users to input a company name, fetches related news
+articles, performs sentiment analysis, and provides a comparative analysis.
+Additionally, the summarized content is converted into Hindi speech using
+a TTS model and also predict the stock prices and provides stock
+recommendations.
 
 ## Features
 
