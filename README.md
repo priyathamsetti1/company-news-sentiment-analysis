@@ -84,9 +84,7 @@ recommendations.
 ### Steps to Run Locally
 
 1. **Clone the Repository**
-   ```bash
-   git clone <GitHub-repo-link>
-   cd News-Summarization-TTS
+   ```![image](https://github.com/user-attachments/assets/b104c77d-9e4d-4109-b1b2-ace30bcff4ba)
    ```
 2. **Install Dependencies**
    ```bash
