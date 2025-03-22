@@ -84,7 +84,7 @@ recommendations.
 ### Steps to Run Locally
 
 1. **Clone the Repository**
-   ```![image](https://github.com/user-attachments/assets/b104c77d-9e4d-4109-b1b2-ace30bcff4ba)
+   ```git clone https://github.com/priyathamsetti1/company-news-sentiment-analysis.git
    ```
 2. **Install Dependencies**
    ```bash
@@ -94,7 +94,7 @@ recommendations.
    ```bash
    streamlit run app.py
    ```
-**Code Structure**
+### Code Structure
 
 **app.py (Frontend & Integration)**
 - Handles user input via Streamlit.
@@ -102,13 +102,11 @@ recommendations.
     analysis, and TTS.
 - Displays results interactively.
   ```
-# Set up API base URL (different for local vs production)
 if os.environ.get("ENVIRONMENT") == "production":
     API_BASE_URL = os.environ.get("API_URL", "https://your-deployed-api-url")
 else:
     API_BASE_URL = "http://127.0.0.1:8000"
 
-# Hero Section with enhanced UI
 st.markdown("""
 <div class="hero">
     <h1>Company News Sentiment Analysis</h1>
@@ -116,8 +114,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Search Bar with enhanced UI
-# Modify your search bar section like this
 st.markdown('<div class="search-container">', unsafe_allow_html=True)
 col1, col2= st.columns([5, 1])
 with col1:
@@ -135,7 +131,6 @@ with col2:
 st.markdown('</div>', unsafe_allow_html=True)
 
 
-# Main Analysis Logic
 if analyze_button and company_name:
     with st.spinner("Fetching news and analyzing sentiment..."):
         try:
