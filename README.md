@@ -347,7 +347,7 @@ curl -X GET "https://priyatahm-news-api.hf.space/news?company=companyname" -H "C
 This project streamlines the process of gathering and analyzing company-related news, assisting in stock estimation. It integrates NLP, sentiment analysis, and TTS capabilities into a user-friendly application. Future improvements can include multilingual TTS, advanced sentiment models, and expanded news sources.
 
 ## Deployment Link
-- **Sentiment Analysis API Access Deployment Link:** [https://priyatahm-sentiment-news-analysis.hf.space]
+- **Hugging faces Deployment Link:** [https://priyatahm-sentiment-news-analysis.hf.space]
 
 ## License
 - **MIT License**
