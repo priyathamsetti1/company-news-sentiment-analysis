@@ -20,12 +20,13 @@ recommendations.
 
 1. **News Extraction**: Extract and display the title, summary, and relevant metadata from at least 10 unique news articles.
 2. **Sentiment Analysis**: Analyze article content for sentiment (Positive, Negative, Neutral).
-3. **Comparative Analysis**: Compare sentiment across articles for insights on news coverage variations.
-4. **Text-to-Speech**: Convert summarized content into Hindi speech using an open-source TTS model.
-5. **User Interface**: Streamlit or Gradio-based UI for easy interaction.
-6. **API Development**: Frontend and backend communication via APIs.
-7. **Deployment**: Hosted on Hugging Face Spaces.
-8. **Documentation**: Detailed README explaining implementation, dependencies, and setup.
+3. **Stock recommendation**:Stock recommendation based on the overall sentiment analysis.
+4. **Comparative Analysis**: Compare sentiment across articles for insights on news coverage variations.
+5. **Text-to-Speech**: Convert summarized content into Hindi speech using an open-source TTS model.
+6. **User Interface**: Streamlit or Gradio-based UI for easy interaction.
+7. **API Development**: Frontend and backend communication via APIs.
+8. **Deployment**: Hosted on Hugging Face Spaces.
+9. **Documentation**: Detailed README explaining implementation, dependencies, and setup.
 
 ## Tech Stack
 
@@ -95,6 +96,46 @@ recommendations.
    ```bash
    streamlit run app.py
    ```
+**Code Structure**
+
+```
+4.1 app.py (Frontend & Integration)
+```
+- Handles user input via Streamlit.
+- Calls backend APIs for news fetching, summarization, sentiment
+    analysis, and TTS.
+- Displays results interactively.
+
+
+-
+
+**backend.py (Core Processing)**
+
+- Orchestrates API calls to perform various tasks.
+- Ensures smooth communication between components.
+
+
+**news_fetcher.py (News Extraction)**
+
+- Uses Feedparser and web scraping techniques like BeautifulSoup
+    to extract news articles.
+- Retrieves metadata such as title, summary, and source.
+
+
+**sentiment_analysis.py (Sentiment Computation)**
+
+- Uses NLP models (VADER, DistilBERT) for sentiment classification.
+- Outputs sentiment scores and classification (Positive, Negative,
+    Neutral).
+
+
+**requirements.tx**
+
+- Lists all required dependencies for the project.
+- Ensures consistency across installations.
+
+
+
 
 ## API Development
 - **API Endpoints**
